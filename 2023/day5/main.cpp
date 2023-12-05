@@ -153,7 +153,7 @@ valuesize getLocationFromSeed(const valuesize &seed, const RangeMaps &value_rang
     if (index == LOCATION_IDX)
         return seed;
 
-    for (auto value_range : value_range_maps[index])
+    for (const auto &value_range : value_range_maps[index])
     {
         if (isWithinRange(seed, value_range.source))
             return getLocationFromSeed(seed - value_range.source.first + value_range.destination.first, value_range_maps, index + 1);
