@@ -100,9 +100,11 @@ int main(int argc, char const *argv[])
 std::string part1(std::stringstream &file_content)
 {
 
+    return "";
 }
 
 std::string part2(std::stringstream &file_content)
 {
-    
+
+    return "";   
 }
