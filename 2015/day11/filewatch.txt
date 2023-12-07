@@ -1,0 +1,3 @@
+tests/sample.txt
+tests/sample2.txt
+tests/input.txt
