@@ -1,2 +1,2 @@
-sample.txt
-input.txt
+tests/sample.txt
+tests/input.txt
