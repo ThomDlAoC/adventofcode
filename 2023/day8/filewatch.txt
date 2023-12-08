@@ -1,0 +1,3 @@
+tests/sample.txt
+tests/input.txt
+#tests/day8.txt
