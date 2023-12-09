@@ -169,7 +169,6 @@ int getPrevLineValue(std::vector<int> &line)
         lines.push_back(next_line);
     }
 
-    lines.back().push_back(0);
 
     size_t len = lines.size();
 
