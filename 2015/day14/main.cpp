@@ -98,7 +98,6 @@ struct Reindeer
     int speed;
     int fly_time;
     int rest_time;
-    int points = 0;
 };
 
 int reindeerDistanceAtTime(int speed, int fly_time, int rest_time, int time)
@@ -148,6 +147,8 @@ std::string part2(std::stringstream &file_content)
 
     auto reindeers = parseInput(file_content);
     int max_points = 0;
+
+    std::unordered_map<Reindeer *, int> reindeers_points;
     for (size_t i = 0; i <= LIMIT_ROUND; i++)
     {
 
@@ -167,9 +168,9 @@ std::string part2(std::stringstream &file_content)
         {
             if (reindeer_distance.second == max_distance)
             {
-                reindeer_distance.first->points++;
-                max_points = std::max(max_points, reindeer_distance.first->points);
-            }
+                reindeers_points[reindeer_distance.first]++;
+                max_points = std::max(max_points, reindeers_points[reindeer_distance.first]);
+                        }
         }
     }
 
