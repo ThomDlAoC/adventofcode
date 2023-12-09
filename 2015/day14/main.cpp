@@ -145,10 +145,10 @@ std::string part1(std::stringstream &file_content)
 std::string part2(std::stringstream &file_content)
 {
 
-    auto reindeers = parseInput(file_content);
-    int max_points = 0;
-
     std::unordered_map<Reindeer *, int> reindeers_points;
+    int max_points = 0;
+    auto reindeers = parseInput(file_content);
+
     for (size_t i = 0; i <= LIMIT_ROUND; i++)
     {
 
@@ -170,7 +170,7 @@ std::string part2(std::stringstream &file_content)
             {
                 reindeers_points[reindeer_distance.first]++;
                 max_points = std::max(max_points, reindeers_points[reindeer_distance.first]);
-                        }
+            }
         }
     }
 
