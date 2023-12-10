@@ -190,6 +190,7 @@ std::string part1(std::stringstream &file_content)
     std::array<int, 2> pos = {0, 0};
     bool start_found = false;
 
+    //get the starting position
     for (size_t row = 0; row < input_map.size(); row++)
     {
         for (size_t col = 0; col < input_map[row].size(); col++)
@@ -208,27 +209,17 @@ std::string part1(std::stringstream &file_content)
     }
 
     std::queue<std::tuple<position_t, direction_t, steps_t>> queue;
-    auto visited_hash = [](const position_t &pos)
-    {
-        return pos[0] * 1000 + pos[1];
-    };
-    auto visited_equal = [](const position_t &pos1, const position_t &pos2)
-    {
-        return pos1[0] == pos2[0] && pos1[1] == pos2[1];
-    };
-    std::unordered_set<position_t, decltype(visited_hash), decltype(visited_equal)> visited(1000, visited_hash, visited_equal);
-    visited.insert(pos);
     visited_map[pos[0]][pos[1]] = true;
 
+    //get the starting directions
     for (size_t i = 0; i < 4; i++)
     {
         position_t next_pos = {pos[0] + dirs[i][0], pos[1] + dirs[i][1]};
         if (next_directions_map[input_map[next_pos[0]][next_pos[1]]][i] != Direction::None)
-        {
             queue.push({pos, i, 0});
-        }
-        visited.insert(pos);
     }
+
+    //walk around the pipe until we reach the farthest point
     int max_steps = 0;
     while (!queue.empty())
     {
@@ -237,14 +228,13 @@ std::string part1(std::stringstream &file_content)
         max_steps = std::max(max_steps, steps);
         position_t next_pos = {pos[0] + dirs[dir][0], pos[1] + dirs[dir][1]};
 
-        if (visited.find(next_pos) != visited.end())
+        if (visited_map[next_pos[0]][next_pos[1]])
             continue;
-            
+
         if (next_directions_map[input_map[next_pos[0]][next_pos[1]]][dir] == Direction::None)
             continue;
 
         queue.push({next_pos, next_directions_map[input_map[next_pos[0]][next_pos[1]]][dir], steps + 1});
-        visited.insert(next_pos);
         visited_map[next_pos[0]][next_pos[1]] = true;
     }
 
@@ -260,86 +250,72 @@ std::string part2(std::stringstream &file_content)
     int height = input_map.size();
 
     std::vector<std::vector<bool>> visited_map(height, std::vector<bool>(width, false));
-
     std::vector<std::vector<int>> inout_map(height, std::vector<int>(width, 0));
 
-    std::array<int, 2> pos = {0, 0};
+    std::array<int, 2> starting_pos = {0, 0};
     bool start_found = false;
 
-    for (size_t row = 0; row < input_map.size(); row++)
-    {
-        for (size_t col = 0; col < input_map[row].size(); col++)
+    //get the starting position
+    for (size_t row = 0; row < input_map.size() && !start_found; row++)
+        for (size_t col = 0; col < input_map[row].size() && !start_found; col++)
         {
             if (input_map[row][col] == 'S')
             {
-                pos = {static_cast<int>(row), static_cast<int>(col)};
+                starting_pos = {static_cast<int>(row), static_cast<int>(col)};
                 start_found = true;
                 break;
             }
         }
-        if (start_found)
-        {
-            break;
-        }
-    }
 
+    //get the starting direction
     std::queue<std::tuple<position_t, direction_t, steps_t, position_t, position_t>> queue;
-    auto visited_hash = [](const position_t &pos)
-    {
-        return pos[0] * 1000 + pos[1];
-    };
-    auto visited_equal = [](const position_t &pos1, const position_t &pos2)
-    {
-        return pos1[0] == pos2[0] && pos1[1] == pos2[1];
-    };
-    std::unordered_set<position_t, decltype(visited_hash), decltype(visited_equal)> visited(1000, visited_hash, visited_equal);
-    visited.insert(pos);
-    visited_map[pos[0]][pos[1]] = true;
+    visited_map[starting_pos[0]][starting_pos[1]] = true;
 
     for (size_t i = 0; i < 4; i++)
     {
-        position_t next_pos = {pos[0] + dirs[i][0], pos[1] + dirs[i][1]};
+        position_t next_pos = {starting_pos[0] + dirs[i][0], starting_pos[1] + dirs[i][1]};
         if (next_directions_map[input_map[next_pos[0]][next_pos[1]]][i] != Direction::None)
         {
             position_t vector_left = {dirs[i][1] * turns[Turn::Left][0], dirs[i][0] * turns[Turn::Left][1]};
             position_t vector_right = {dirs[i][1] * turns[Turn::Righ][0], dirs[i][0] * turns[Turn::Righ][1]};
-            queue.push({pos, i, 0, vector_left, vector_right});
+            queue.push({starting_pos, i, 0, vector_left, vector_right});
             break;
         }
     }
 
+    //walk around the pipe and flag the inside
     while (!queue.empty())
     {
         auto [pos, dir, steps, vector_left, vector_right] = queue.front();
         queue.pop();
+
         inout_map[pos[0] + vector_left[0]][pos[1] + vector_left[1]]++;
         inout_map[pos[0] + vector_right[0]][pos[1] + vector_right[1]]--;
+
         position_t next_pos = {pos[0] + dirs[dir][0], pos[1] + dirs[dir][1]};
 
-        if (visited.find(next_pos) != visited.end())
-            continue;
-
         if (next_directions_map[input_map[next_pos[0]][next_pos[1]]][dir] == Direction::None)
-            continue;
+            break;
+
+        inout_map[next_pos[0] + vector_left[0]][pos[1] + vector_left[1]]++;
+        inout_map[next_pos[0] + vector_right[0]][pos[1] + vector_right[1]]--;
 
         int next_rotation = next_rotations_map[input_map[next_pos[0]][next_pos[1]]][dir];
+        position_t next_vector_left = vector_left;
+        position_t next_vector_right = vector_right;
+
         if (next_rotation != Turn::None)
         {
-            position_t next_vector_left = {vector_left[1] * turns[next_rotation][0], vector_left[0] * turns[next_rotation][1]};
-            position_t next_vector_right = {vector_right[1] * turns[next_rotation][0], vector_right[0] * turns[next_rotation][1]};
+            next_vector_left = {vector_left[1] * turns[next_rotation][0], vector_left[0] * turns[next_rotation][1]};
+            next_vector_right = {vector_right[1] * turns[next_rotation][0], vector_right[0] * turns[next_rotation][1]};
+        }
 
-            inout_map[next_pos[0] + vector_left[0]][pos[1] + vector_left[1]]++;
-            inout_map[next_pos[0] + vector_right[0]][pos[1] + vector_right[1]]--;
-            queue.push({next_pos, next_directions_map[input_map[next_pos[0]][next_pos[1]]][dir], steps + 1, next_vector_left, next_vector_right});
-        }
-        else
-        {
-            queue.push({next_pos, next_directions_map[input_map[next_pos[0]][next_pos[1]]][dir], steps + 1, vector_left, vector_right});
-        }
-        visited.insert(next_pos);
+        queue.push({next_pos, next_directions_map[input_map[next_pos[0]][next_pos[1]]][dir], steps + 1, next_vector_left, next_vector_right});
         visited_map[next_pos[0]][next_pos[1]] = true;
     }
 
+
+    //fill the gaps and count the total in
     int totalin = 0;
     for (size_t row = 1; row < input_map.size() - 1; row++)
     {
@@ -358,6 +334,7 @@ std::string part2(std::stringstream &file_content)
         }
     }
 
+    //print the map
     for (size_t row = 0; row < input_map.size(); row++)
     {
         for (size_t col = 0; col < input_map[row].size(); col++)
