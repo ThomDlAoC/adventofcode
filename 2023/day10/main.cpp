@@ -223,10 +223,6 @@ std::string part1(std::stringstream &file_content)
     for (size_t i = 0; i < 4; i++)
     {
         position_t next_pos = {pos[0] + dirs[i][0], pos[1] + dirs[i][1]};
-        if (next_pos[0] < 0 || next_pos[0] >= (int)input_map.size() || next_pos[1] < 0 || next_pos[1] >= (int)input_map[next_pos[0]].size())
-        {
-            continue;
-        }
         if (next_directions_map[input_map[next_pos[0]][next_pos[1]]][i] != Direction::None)
         {
             queue.push({pos, i, 0});
@@ -243,10 +239,7 @@ std::string part1(std::stringstream &file_content)
 
         if (visited.find(next_pos) != visited.end())
             continue;
-
-        if (next_pos[0] < 0 || next_pos[0] >= (int)input_map.size() || next_pos[1] < 0 || next_pos[1] >= (int)input_map[0].size())
-            continue;
-
+            
         if (next_directions_map[input_map[next_pos[0]][next_pos[1]]][dir] == Direction::None)
             continue;
 
