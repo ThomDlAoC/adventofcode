@@ -136,10 +136,7 @@ std::vector<std::pair<std::vector<int>, std::vector<int>>> parseInput(std::strin
 
 int evalSymmetryIndex(std::vector<int> &values, int max_fixes)
 {
-    int symmetry_index = 0;
-    int arr_size = values.size();
-
-    for (int i = 0; i < arr_size - 1; i++)
+    for (int i = 0, arr_size = values.size(); i < arr_size - 1; i++)
     {
         int match = false;
         int xored_fix = values[i] ^ values[i + 1];
@@ -160,7 +157,7 @@ int evalSymmetryIndex(std::vector<int> &values, int max_fixes)
             return i + 1;
     }
 
-    return symmetry_index;
+    return 0;
 }
 
 std::string part1(std::stringstream &file_content)
