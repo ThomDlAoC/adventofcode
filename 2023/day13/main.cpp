@@ -98,7 +98,6 @@ int main(int argc, char const *argv[])
 
 std::vector<std::pair<std::vector<int>, std::vector<int>>> parseInput(std::stringstream &file_content)
 {
-
     std::string line;
     std::vector<std::string> lines;
 
@@ -108,14 +107,11 @@ std::vector<std::pair<std::vector<int>, std::vector<int>>> parseInput(std::strin
     {
         if (line.empty())
         {
-
             int width = lines[0].size();
             int height = lines.size();
 
             std::vector<int> row_values(height, 0);
             std::vector<int> col_values(width, 0);
-
-            std::pair<std::vector<int>, std::vector<int>> tile_value;
 
             for (int i = 0; i < height; i++)
             {
@@ -126,9 +122,7 @@ std::vector<std::pair<std::vector<int>, std::vector<int>>> parseInput(std::strin
                 }
             }
 
-            tile_value = std::make_pair(row_values, col_values);
-
-            tile_values.push_back(tile_value);
+            tile_values.push_back(std::make_pair(row_values, col_values));
 
             lines.clear();
             continue;
@@ -140,39 +134,8 @@ std::vector<std::pair<std::vector<int>, std::vector<int>>> parseInput(std::strin
     return tile_values;
 }
 
-int evalSymmetryIndex(std::vector<int> &values)
+int evalSymmetryIndex(std::vector<int> &values, int max_fixes)
 {
-
-    int symmetry_index = 0;
-    int arr_size = values.size();
-    for (int i = 0; i < arr_size - 1; i++)
-    {
-        int match = false;
-        if (values[i] == values[i + 1])
-        {
-            match = true;
-
-            for (int h = i - 1, k = i + 2; h >= 0 && k < arr_size; h--, k++)
-            {
-                if (values[h] != values[k])
-                {
-                    match = false;
-                    break;
-                }
-            }
-        }
-        if (match)
-        {
-            return  i + 1;
-        }
-    }
-
-    return symmetry_index;
-}
-
-int evalSymmetryIndex2(std::vector<int> &values)
-{
-
     int symmetry_index = 0;
     int arr_size = values.size();
 
@@ -183,62 +146,35 @@ int evalSymmetryIndex2(std::vector<int> &values)
         int smudge_fixed = xored_fix && (xored_fix & (xored_fix - 1)) == 0;
         if (values[i] == values[i + 1] || smudge_fixed)
         {
-            match = true; 
-
-            for (int h = i - 1, k = i + 2; h >= 0 && k < arr_size; h--, k++)
+            match = true;
+            for (int h = i - 1, k = i + 2; h >= 0 && k < arr_size && match; h--, k++)
             {
                 int xored_fix = values[h] ^ values[k];
                 int can_fix = xored_fix && (xored_fix & (xored_fix - 1)) == 0;
-                if (can_fix)
-                    smudge_fixed++;
+                smudge_fixed += can_fix;
                 if (values[h] != values[k] && !can_fix)
-                {
                     match = false;
-                    break;
-                }
             }
         }
-        if (match && smudge_fixed == 1)
-        {
+        if (match && smudge_fixed == max_fixes)
             return i + 1;
-        }
     }
 
     return symmetry_index;
-
-    return 0;
 }
 
 std::string part1(std::stringstream &file_content)
 {
-
     auto input_values = parseInput(file_content);
-
-    int sum = 0;
-    for (auto &tile : input_values)
-    {
-
-        int sysmmetry_index_row = evalSymmetryIndex(tile.first);
-        int sysmmetry_index_col = evalSymmetryIndex(tile.second);
-        sum += 100 * sysmmetry_index_row + sysmmetry_index_col;
-    }
-
+    int sum = std::accumulate(input_values.begin(), input_values.end(), 0, [](int acc, auto &tile)
+                              { return acc + 100 * evalSymmetryIndex(tile.first, 0) + evalSymmetryIndex(tile.second, 0); });
     return std::to_string(sum);
 }
 
 std::string part2(std::stringstream &file_content)
 {
-
     auto input_values = parseInput(file_content);
-
-    int sum = 0;
-    for (auto &tile : input_values)
-    {
-
-        int sysmmetry_index_row = evalSymmetryIndex2(tile.first);
-        int sysmmetry_index_col = evalSymmetryIndex2(tile.second);
-        sum += 100 * sysmmetry_index_row + sysmmetry_index_col;
-    }
-
+    int sum = std::accumulate(input_values.begin(), input_values.end(), 0, [](int acc, auto &tile)
+                              { return acc + 100 * evalSymmetryIndex(tile.first, 1) + evalSymmetryIndex(tile.second, 1); });
     return std::to_string(sum);
 }
