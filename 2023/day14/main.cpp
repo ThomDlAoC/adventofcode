@@ -224,7 +224,6 @@ std::string part1(std::stringstream &file_content)
 std::string part2(std::stringstream &file_content)
 {
     std::vector<std::string> input = parseInput(file_content);
-    std::unordered_set<std::string> seen;
     std::unordered_map<std::string, int> occurences;
     for (int i = 0; i < 10000000; ++i)
     {
@@ -234,17 +233,9 @@ std::string part2(std::stringstream &file_content)
         rollEast(input);
 
         std::string key = std::accumulate(input.begin(), input.end(), std::string());
-        if (seen.find(key) != seen.end())
-        {
-            if (occurences[key])
-            {
-                const auto &occurence = occurences[key];
-                if ((1000000000 - 1 - occurence) % (i - occurence) == 0)
-                    return std::to_string(calculateLoad(input));
-            }
-            occurences[key] = i;
-        }
-        seen.insert(key);
+        if (occurences[key] && ((1000000000 - 1 - occurences[key]) % (i - occurences[key]) == 0))
+            return std::to_string(calculateLoad(input));
+        occurences[key] = i;
     }
 
     return "";
